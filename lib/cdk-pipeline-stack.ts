@@ -1,7 +1,7 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as codecommit from 'aws-cdk-lib/aws-codecommit';
-import { CodeBuildStep, CodePipeline, CodePipelineSource } from "aws-cdk-lib/pipelines";
+import { CodeBuildStep, CodePipeline, CodePipelineSource, ManualApprovalStep } from "aws-cdk-lib/pipelines";
 import { MyPipelineAppStage } from './pipeline-app-stage';
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
@@ -32,7 +32,11 @@ export class CdkPipelineStack extends Stack {
       )
     });
 
-    pipeline.addStage(new MyPipelineAppStage(this, "pre-prod"));
+    const testingStage = pipeline.addStage(new MyPipelineAppStage(this, "testingStage"));
+
+    testingStage.addPost(new ManualApprovalStep('approval'));
+
+   pipeline.addStage(new MyPipelineAppStage(this, "prodStage"));
 
   }
 }
